@@ -1,0 +1,24 @@
+{
+  "name": "pts-unspent",
+  "version": "0.1.0",
+  "description": "",
+  "main": "main.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "seeekr",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "~2.1.0",
+    "moment": "~2.5.1",
+    "lodash": "~2.4.1",
+    "bitcoin": "~2.0.1",
+    "fibrous": "~0.3.3",
+    "snappy": "~2.1.2",
+    "mkdirp": "~0.3.5",
+    "fs-extra": "~0.8.1"
+  }
+}
