@@ -36,7 +36,7 @@ fibrous(function () {
         lastBlockTime = 0,
         unspent = {} // txId_n -> value,address
         , coinbase = 50 // cause we're skipping genesis block which still did create 50 coins
-        , lastOutputDate = moment.utc(0)
+        , lastOutputDate = null
         ;
 
     // create cache folders
@@ -50,7 +50,7 @@ fibrous(function () {
         nextBlockHash = block.nextblockhash;
 
         var date = moment.utc(block.time * 1000);
-        if (date.hour() == 0 && date.dayOfYear() > lastOutputDate.dayOfYear()) {
+        if (date.hour() == 0 && (!lastOutputDate || date.dayOfYear() > lastOutputDate.dayOfYear())) {
             // first block of the day, output stuff for the last day now
 
             date.subtract('days', 1);
