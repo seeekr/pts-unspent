@@ -1,4 +1,4 @@
-var lib = require('./../lib'), processTx = lib.processTx, acct = require('ptsaccounting');
+var lib = require('./../lib'), processTx = lib.processTx, acct = require('../ptsaccounting');
 
 var testTransactions = {
     printCoins1: {
@@ -52,7 +52,7 @@ exports.testProcessTxPrintCoins1 = function (test) {
 };
 
 exports.testGetBalances = function (test) {
-    test.deepEqual(getBalances({
+    test.deepEqual(acct.getBalances({
         tx1_0: {
             address: 'P1',
             value: 1
@@ -69,6 +69,8 @@ exports.testGetBalances = function (test) {
         { P1: 3 },
         { P2: 5 }
     ]);
+
+    test.done();
 };
 
 //exports.testProcessTx = function (test) {
