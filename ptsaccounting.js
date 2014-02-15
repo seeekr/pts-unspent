@@ -5,7 +5,6 @@ var bitcoin = require('bitcoin')
     , zlib = require('zlib')
     , moment = require('moment')
     , mkdirp = require('mkdirp')
-    , program = require('commander')
     ;
 var fibrous = require('fibrous');
 var client = new bitcoin.Client({
@@ -14,10 +13,6 @@ var client = new bitcoin.Client({
     user: 'protosharesrpc',
     pass: 'b42a0ae5c031fc31646213866bf902db'
 });
-
-program
-    .option('-c, --clear-cache', 'Start with fresh cache')
-    .parse(process.argv);
 
 var tx, block;
 
@@ -34,67 +29,47 @@ var getBalances = exports.getBalances = function (unspent) {
         });
 };
 
-//fs.writeFile('cache/file1', 'asdf');
-//fs.writeFile('cache/file2', 'asdf');
-//
-//var gzip = zlib.createGzip();
-//fs.createReadStream('cache/file1').pipe(gzip).pipe(fs.createWriteStream('cache/file1.gz'));
+function writeInfo(m, coinbase, unspent, debug, lastBlockTime) {
+    if (m.hour() == 0) {
+        // first block of the day, output stuff for the last day now
+        m.subtract('days', 1);
+        var timeFmt = m.format('YYYY_MM_DD');
 
-//zlib.gzip('asdf', function (err, out) {
-//    console.log(out);
-//    fs.writeFile('cache/abcd', out.toString('base64'), function(err) {
-//        if(err) {
-//            console.log(err);
-//        }
-//        console.log("done");
-//    });
-//});
-
-//fs.writeFile('cache/qwer', 'qwer');
-
-//process.exit();
-
-function write2(f, contents, cb) {
-    fs.open(f, 'w', function (err, fd) {
-        if (err) {
-            console.log("couldn't open file", err);
-            if (cb) {
-                cb(err);
-            } else {
+        // write unspent state for fast resume
+        var unspentOut = JSON.stringify({coinbase: coinbase, unspent: unspent});
+        var internalFile = 'cache/internal/' + timeFmt + '.json';
+        zlib.gzip(unspentOut, function (err, unspentOut) {
+            if (err) {
+                console.log("couldn't gzip file", err);
                 throw err;
             }
-        }
-        fs.write(fd, new Buffer(contents, 'utf8'), function (err) {
-            try {
+            fs.writeFile(internalFile + '.gz', unspentOut, function (err) {
                 if (err) {
-                    console.log("couldn't write file", err);
-                    if (cb) {
-                        cb(err);
-                    } else {
-                        throw err;
-                    }
+                    console.log("couldn't write balance file", err);
+                    throw err;
                 }
-            } finally {
-                fs.close(fd, function (err) {
-                    if (err) {
-                        console.log("couldn't write file", err);
-                        if (cb) {
-                            cb(err);
-                        } else {
-                            throw err;
-                        }
-                    }
-                    if (cb) {
-                        cb(err);
-                    }
-                });
-            }
+            });
         });
-    });
-}
+        if (debug) {
+            fs.writeFile(internalFile, unspentOut);
+        }
 
-function write(f, contents, cb) {
-//    fs.writeFile(f, contents, cb);
+        // compute and write balance for public consumption
+        var balanceOut = JSON.stringify({
+            blocknum: block.height - 1,
+            blocktime: lastBlockTime,
+            moneysupply: coinbase,
+            balances: getBalances(unspent)
+        });
+        var balanceFile = 'cache/balance/' + timeFmt + '.json';
+        fs.writeFile(balanceFile, balanceOut, function (err) {
+            if (err) {
+                console.log(err);
+                throw err;
+            }
+            fs.createReadStream(balanceFile).pipe(zlib.createGzip()).pipe(fs.createWriteStream(balanceFile + '.gz'));
+        });
+    }
 }
 
 fibrous(function () {
@@ -108,9 +83,6 @@ fibrous(function () {
         , debug = true
         ;
 
-    if (program.clearCache) {
-        fs.removeSync('cache');
-    }
     // create cache folders
     mkdirp.sync('cache/internal');
     mkdirp.sync('cache/balance');
@@ -125,52 +97,8 @@ fibrous(function () {
         if (i % 100 == 0) {
             console.log("blocktime: %s", m.format());
         }
-        if (m.hour() == 0) {
-            // first block of the day, output stuff for the last day now
-            m.subtract('days', 1);
-            const timeFmt = m.format('YYYY_MM_DD');
 
-            // write unspent state for fast resume
-            const unspentOut = JSON.stringify({coinbase: coinbase, unspent: unspent});
-//            snappy.compress(unspentOut, function (err, unspentOut) {
-//                if (err) {
-//                    console.log("couldn't snappy-compress file", err);
-//                    throw err;
-//                }
-//                fs.writeFile('cache/internal/' + timeFmt + '.json.snappy', unspentOut);
-//            });
-            if (debug) {
-                write('cache/internal/' + timeFmt + '.json', unspentOut);
-            }
-
-            // compute and write balance for public consumption
-            const balanceOut = JSON.stringify({
-                blocknum: block.height - 1,
-                blocktime: lastBlockTime,
-                moneysupply: coinbase,
-                balances: getBalances(unspent)
-            });
-            const balanceFile = 'cache/balance/' + timeFmt + '.json';
-            write(balanceFile, balanceOut, function (err) {
-                if (err) {
-                    console.log(err);
-                    throw err;
-                }
-                fs.createReadStream(balanceFile).pipe(zlib.createGzip()).pipe(fs.createWriteStream(balanceFile + '.gz'));
-            });
-//            zlib.gzip(balanceOut, function (err, balanceOut) {
-//                if (err) {
-//                    console.log("couldn't gzip file", err);
-//                    throw err;
-//                }
-//                fs.writeFile('cache/balance/' + timeFmt + '.json.gz', balanceOut, function (err) {
-//                    if (err) {
-//                        console.log("couldn't write balance file", err);
-//                        throw err;
-//                    }
-//                });
-//            });
-        }
+        writeInfo(m, coinbase, unspent, debug, lastBlockTime);
 
         _.each(block.tx, function (txId) {
             tx = client.sync.getRawTransaction(txId, DECODED);
