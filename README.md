@@ -10,7 +10,8 @@ Install node and npm via your favorite package manager.
 
 Clone this git repo.
 
-Change into repo folder, run npm install, edit bitcoind connection properties in ptsaccounting.js, then execute node ptsaccuonting.js.
+Change into repo folder, run `npm install`, edit bitcoind connection properties in ptsaccounting.js, then execute `node ptsaccounting.js`.
+
 
 The desired output files are created in the folder cache/balance, timestamped with the day of the last included block's time.
 
@@ -18,7 +19,7 @@ The desired output files are created in the folder cache/balance, timestamped wi
 About the code
 ==============
 * uses Fibers/fibrous for making things synchronous, which is what we need for this batch-processing work
-* only ptsaccounting.js matters really, the rest is mostly for experimentation and learning, will be cleaned up later
+* only ptsaccounting.js matters really right now, the rest is mostly for experimentation and learning, will be cleaned up later
 
 TODO
 ====
