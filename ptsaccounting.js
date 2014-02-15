@@ -1,7 +1,6 @@
 var bitcoin = require('bitcoin')
     , _ = require('lodash')
     , fs = require('fs-extra')
-    , snappy = require('snappy')
     , zlib = require('zlib')
     , moment = require('moment')
     , mkdirp = require('mkdirp')
