@@ -53,7 +53,7 @@ fibrous(function () {
 
         var date = moment.utc(block.time * 1000);
         if (date.hour() == 0 && (!lastOutputDate || date.dayOfYear() > lastOutputDate.dayOfYear())) {
-            // first block of the day, output stuff for the last day now
+            // first block of the next day, output stuff for the last day now
 
             date.subtract('days', 1);
             lastOutputDate = date;
@@ -77,8 +77,7 @@ fibrous(function () {
                     isCoinbase = true;
                     return;
                 }
-                var k = (vin.txid + '_' + vin.vout);
-                delete unspent[k];
+                delete unspent[vin.txid + '_' + vin.vout];
             });
             _.each(tx.vout, function (vout) {
                 // TODO check for other kinds of scripts?
