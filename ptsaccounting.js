@@ -42,7 +42,7 @@ fibrous(function () {
         ;
 
     // create cache folders
-    mkdirp.sync('cache/internal');
+//    mkdirp.sync('cache/internal');
     mkdirp.sync('cache/balance');
 
     for (var i = first; i < last; i++) {
@@ -60,7 +60,7 @@ fibrous(function () {
 
             var ts = date.format('YYYY_MM_DD');
             // write unspent state for fast resume
-            cacheInternalJson(coinbase, unspent, ts);
+//            cacheInternalJson(coinbase, unspent, ts);
             // compute and write balance for public consumption
             cacheJson({
                 blocknum: block.height - 1,
@@ -98,7 +98,7 @@ fibrous(function () {
         lastBlockTime = block.time;
     }
 
-    cacheInternalJson(coinbase, unspent, 'lastblock');
+//    cacheInternalJson(coinbase, unspent, 'lastblock');
 
 })(function (err, d) {
     if (err) {
