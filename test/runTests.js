@@ -66,8 +66,8 @@ exports.testGetBalances = function (test) {
             value: 5
         }
     }), [
-        { P1: 3 },
-        { P2: 5 }
+        [ 'P1', 3 ],
+        [ 'P2', 5 ]
     ]);
 
     test.done();

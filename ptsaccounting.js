@@ -22,11 +22,13 @@ var getBalances = exports.getBalances = function (unspent) {
             return bal;
         }, {}),
         function (v, k) {
-            var o = {};
-            o[k] = v;
-            return o;
+            return [k, v];
         });
 };
+
+if (process.argv[1].indexOf('ptsaccounting') == -1) {
+    return; // stuff below is only for direct execution of this file
+}
 
 fibrous(function () {
     var DECODE_TX = 1;
